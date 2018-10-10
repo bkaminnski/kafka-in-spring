@@ -10,48 +10,48 @@ services:
     hostname: zookeeper1
     image: zookeeper
     environment:
-      - ZOO_MY_ID=1
-      - ZOO_PORT=2181
-      - ZOO_SERVERS=server.1=zookeeper1:2888:3888
+    - ZOO_MY_ID=1
+    - ZOO_PORT=2181
+    - ZOO_SERVERS=server.1=zookeeper1:2888:3888
     ports:
-      - 2181:2181
+    - 2181:2181
     volumes:
-      - /mnt/sda1/kafkainspring/zookeeper1/data:/data
-      - /mnt/sda1/kafkainspring/zookeeper1/datalog:/datalog
+    - /mnt/sda1/kafkainspring/zookeeper1/data:/data
+    - /mnt/sda1/kafkainspring/zookeeper1/datalog:/datalog
     networks:
-      - kafkainspring_network
+    - kafkainspring_network
 
   kafka1:
     image: wurstmeister/kafka
     container_name: kafka1
     hostname: kafka1
     environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181
-      - KAFKA_PORT=9091
-      - KAFKA_LISTENERS=PLAINTEXT://kafka1:9091
-      # name:partitions:replicas:cleanup.policy
-      - KAFKA_CREATE_TOPICS=test:1:1,test2:1:1,test3:1:1
+    - KAFKA_BROKER_ID=1
+    - KAFKA_ZOOKEEPER_CONNECT=zookeeper1:2181
+    - KAFKA_PORT=9091
+    - KAFKA_LISTENERS=PLAINTEXT://kafka1:9091
+    # name:partitions:replicas:cleanup.policy
+    - KAFKA_CREATE_TOPICS=assignedConsumerTopic:1:1,subscribedConsumerTopic:1:1
     ports:
-      - 9091:9091
+    - 9091:9091
     volumes:
-      - /mnt/sda1/kafkainspring/kafka1/data:/data
+    - /mnt/sda1/kafkainspring/kafka1/data:/data
     networks:
-      - kafkainspring_network
+    - kafkainspring_network
     depends_on:
-      - zookeeper1
-      
+    - zookeeper1
+
   postgres:
     container_name: postgres
     image: bkaminnski/postgres-initializable
     environment:
-      - POSTGRES_PASSWORD=postgres
-      # Databases to initialize separated by space. For each database "db user"="db name"="SERVICE_NAME". Format: SERVICE1_NAME;DB1_PASSWORD SERVICE2_NAME;DB2_PASSWORD ...
-      - INITIAL_DATABASES=kafkadb;kafkadb
+    - POSTGRES_PASSWORD=postgres
+    # Databases to initialize separated by space. For each database "db user"="db name"="SERVICE_NAME". Format: SERVICE1_NAME;DB1_PASSWORD SERVICE2_NAME;DB2_PASSWORD ...
+    - INITIAL_DATABASES=kafkadb;kafkadb
     ports:
-      - "5432:5432"
+    - "5432:5432"
     expose:
-      - "5432"
+    - "5432"
     command: postgres
     networks:
-      - kafkainspring_network
+    - kafkainspring_network

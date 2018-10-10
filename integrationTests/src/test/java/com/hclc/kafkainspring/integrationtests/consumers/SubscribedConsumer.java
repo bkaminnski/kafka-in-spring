@@ -7,14 +7,14 @@ import javax.ws.rs.core.Response;
 
 import static org.glassfish.grizzly.http.util.HttpStatus.GATEWAY_TIMEOUT_504;
 
-public class AssignedConsumer {
+public class SubscribedConsumer {
 
-    private static final String ENDPOINT = "http://localhost:8087";
-    private WebTarget assignedConsumerTarget;
+    private static final String ENDPOINT = "http://localhost:8086";
+    private WebTarget subscribedConsumerTarget;
 
-    public AssignedConsumer() {
+    public SubscribedConsumer() {
         Client client = ClientBuilder.newClient();
-        assignedConsumerTarget = client.target(ENDPOINT);
+        subscribedConsumerTarget = client.target(ENDPOINT);
     }
 
     public ConsumedRecord readConsumed() {
@@ -27,7 +27,7 @@ public class AssignedConsumer {
     }
 
     private Response readConsumedWithTimeoutMillis(int timeoutMillis) {
-        return assignedConsumerTarget.path("/consumed")
+        return subscribedConsumerTarget.path("/consumed")
                 .queryParam("timeoutMillis", timeoutMillis)
                 .request()
                 .get();

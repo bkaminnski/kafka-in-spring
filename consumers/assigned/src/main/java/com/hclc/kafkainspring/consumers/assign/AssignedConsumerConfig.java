@@ -31,7 +31,7 @@ public class AssignedConsumerConfig {
     @Bean
     KafkaMessageListenerContainer<String, String> kafkaMessageListenerContainer() {
         ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerConfigs());
-        TopicPartitionInitialOffset topicPartitionInitialOffset = new TopicPartitionInitialOffset("consumerAssignTopic", 0);
+        TopicPartitionInitialOffset topicPartitionInitialOffset = new TopicPartitionInitialOffset("assignedConsumerTopic", 0);
         ContainerProperties containerProperties = new ContainerProperties(topicPartitionInitialOffset);
         containerProperties.setMessageListener((MessageListener<String, String>) consumerRecord -> assignedConsumer.consume(consumerRecord));
         return new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);

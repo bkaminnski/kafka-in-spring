@@ -1,4 +1,4 @@
-package com.hclc.kafkainspring.integrationtests.consumerassign;
+package com.hclc.kafkainspring.integrationtests.consumers;
 
 import com.hclc.kafkainspring.integrationtests.FailableMessage;
 

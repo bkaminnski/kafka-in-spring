@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SubscribesConsumerApplication {
+public class SubscribedConsumerApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(SubscribesConsumerApplication.class, args);
+        SpringApplication.run(SubscribedConsumerApplication.class, args);
     }
 }

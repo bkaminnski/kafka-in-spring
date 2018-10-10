@@ -1,5 +1,7 @@
 package com.hclc.kafkainspring.integrationtests.producer;
 
+import com.hclc.kafkainspring.integrationtests.TypeOfFailure;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -14,9 +16,10 @@ public class Producer {
         producerTarget = client.target(ENDPOINT);
     }
 
-    public ProducedRecord produce() {
+    public ProducedRecord produce(String toTopic, TypeOfFailure typeOfFailure) {
         return producerTarget.path("/produce")
-                .queryParam("typeOfFailure", "NONE")
+                .queryParam("toTopic", toTopic)
+                .queryParam("typeOfFailure", typeOfFailure.toString())
                 .request()
                 .get()
                 .readEntity(ProducedRecord.class);

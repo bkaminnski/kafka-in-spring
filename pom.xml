@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
 
     <name>kafkainspring</name>
-	<description>How to use Kafka in Spring</description>
+    <description>How to use Kafka in Spring</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

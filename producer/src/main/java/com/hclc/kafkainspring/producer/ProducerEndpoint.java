@@ -23,12 +23,13 @@ public class ProducerEndpoint {
 
     @GetMapping(produces = APPLICATION_JSON_VALUE)
     public ProducedRecord<String, String> produce(
+            @RequestParam("toTopic") String toTopic,
             @RequestParam("typeOfFailure") TypeOfFailure typeOfFailure,
             @RequestParam(value = "failuresCount", required = false) Optional<Integer> failuresCount
     ) throws ExecutionException, InterruptedException, JsonProcessingException {
         FailableMessage failableMessage = new FailableMessage(typeOfFailure, failuresCount);
         String payload = new ObjectMapper().writeValueAsString(failableMessage);
-        ListenableFuture<SendResult<String, String>> sendResultListenable = template.send("test", failableMessage.getUniqueId(), payload);
+        ListenableFuture<SendResult<String, String>> sendResultListenable = template.send(toTopic, failableMessage.getUniqueId(), payload);
         SendResult<String, String> sendResult = sendResultListenable.get();
         return new ProducedRecord<>(sendResult, failableMessage);
     }

@@ -10,15 +10,16 @@
 
     <name>Kafka in Spring Consumers</name>
 
-	<parent>
-		<groupId>com.hclc</groupId>
-		<artifactId>kafkainspring</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../</relativePath>
-	</parent>
+    <parent>
+        <groupId>com.hclc</groupId>
+        <artifactId>kafkainspring</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../</relativePath>
+    </parent>
 
     <modules>
-        <module>assign</module>
+        <module>assigned</module>
+        <module>subscribed</module>
     </modules>
 
     <dependencies>
