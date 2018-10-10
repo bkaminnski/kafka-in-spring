@@ -1,4 +1,4 @@
-package com.hclc.kafkainspring.producer;
+package com.hclc.kafkainspring.consumers.assign;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ProducerApplicationTests {
+public class ConsumerSubscribeApplicationTests {
 
 	@Test
 	public void contextLoads() {
