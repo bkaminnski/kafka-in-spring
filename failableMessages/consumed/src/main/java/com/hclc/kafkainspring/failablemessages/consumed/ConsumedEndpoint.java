@@ -11,22 +11,20 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.springframework.http.ResponseEntity.ok;
-import static org.springframework.http.ResponseEntity.status;
 
 @RestController("/consumed")
 public class ConsumedEndpoint {
 
-    private BlockingQueue<ConsumedRecord> consumedRecords = new LinkedBlockingQueue<>();
+    private BlockingQueue<ConsumedRecord<?, ?>> consumedRecords = new LinkedBlockingQueue<>();
 
     @GetMapping
-    public ResponseEntity<ConsumedRecord> getConsumed(@RequestParam long timeoutMillis) throws InterruptedException {
-        ConsumedRecord consumedRecord = consumedRecords.poll(timeoutMillis, MILLISECONDS);
+    public ResponseEntity<ConsumedRecord<?, ?>> getConsumed(@RequestParam long timeoutMillis) throws InterruptedException {
+        ConsumedRecord<?, ?> consumedRecord = consumedRecords.poll(timeoutMillis, MILLISECONDS);
         return consumedRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(consumedRecord);
     }
 
     @EventListener
-    public void exposeFailableMesssage(ConsumedRecord consumedRecord) throws InterruptedException {
+    public void exposeConsumedRecord(ConsumedRecord<?, ?> consumedRecord) throws InterruptedException {
         consumedRecords.put(consumedRecord);
     }
 }

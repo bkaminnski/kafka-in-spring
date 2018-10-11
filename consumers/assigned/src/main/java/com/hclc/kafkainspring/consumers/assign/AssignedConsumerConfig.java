@@ -34,6 +34,7 @@ public class AssignedConsumerConfig {
         ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerConfigs());
         TopicPartitionInitialOffset topicPartitionInitialOffset = new TopicPartitionInitialOffset("assignedConsumerTopic", 0);
         ContainerProperties containerProperties = new ContainerProperties(topicPartitionInitialOffset);
+        containerProperties.setErrorHandler(assignedConsumer::handleError);
         containerProperties.setMessageListener((MessageListener<String, String>) consumerRecord -> assignedConsumer.consume(consumerRecord));
         return new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
     }

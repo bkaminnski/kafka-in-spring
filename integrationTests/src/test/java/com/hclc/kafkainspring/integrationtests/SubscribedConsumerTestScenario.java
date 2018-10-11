@@ -1,6 +1,7 @@
 package com.hclc.kafkainspring.integrationtests;
 
-import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecord;
+import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecordResponse;
+import com.hclc.kafkainspring.integrationtests.consumers.ErrorHandledRecordResponse;
 import com.hclc.kafkainspring.integrationtests.consumers.SubscribedConsumer;
 import com.hclc.kafkainspring.integrationtests.producer.ProducedRecord;
 import com.hclc.kafkainspring.integrationtests.producer.Producer;
@@ -25,10 +26,21 @@ public class SubscribedConsumerTestScenario {
     @Test
     void producerProducesSubscribedConsumerConsumes() {
         ProducedRecord produced = producer.produce("subscribedConsumerTopic", NONE);
-        ConsumedRecord consumed = consumer.readConsumed();
 
-        assertThat(consumed.getFailableMessage()).isEqualTo(produced.getFailableMessage());
-        assertThat(consumed.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
+        assertConsumedMatchesProduced(produced);
+        assertNoExceptionWasHandled();
+    }
+
+    private void assertConsumedMatchesProduced(ProducedRecord produced) {
+        ConsumedRecordResponse consumed = consumer.readConsumed();
+        assertThat(consumed.isOk()).isTrue();
+        assertThat(consumed.getConsumedRecord().getFailableMessage()).isEqualTo(produced.getFailableMessage());
+        assertThat(consumed.getConsumedRecord().getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
                 "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
+    }
+
+    private void assertNoExceptionWasHandled() {
+        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
+        assertThat(errorHandled.isTimedOut()).isTrue();
     }
 }

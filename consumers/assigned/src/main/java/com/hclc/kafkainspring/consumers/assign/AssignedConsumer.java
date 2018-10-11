@@ -2,6 +2,7 @@ package com.hclc.kafkainspring.consumers.assign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hclc.kafkainspring.failablemessages.consumed.ConsumedRecord;
+import com.hclc.kafkainspring.failablemessages.consumed.ErrorHandledRecord;
 import com.hclc.kafkainspring.failablemessages.consumed.FailableMessage;
 import com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,5 +30,9 @@ public class AssignedConsumer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void handleError(Exception exception, ConsumerRecord<?, ?> consumerRecord) {
+        eventPublisher.publishEvent(new ErrorHandledRecord<>(consumerRecord, exception));
     }
 }
