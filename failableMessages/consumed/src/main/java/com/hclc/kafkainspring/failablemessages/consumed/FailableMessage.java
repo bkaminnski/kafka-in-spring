@@ -1,5 +1,9 @@
 package com.hclc.kafkainspring.failablemessages.consumed;
 
+import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
+
 public class FailableMessage {
 
     private String uniqueId;
@@ -16,6 +20,10 @@ public class FailableMessage {
 
     public TypeOfFailure getTypeOfFailure() {
         return typeOfFailure;
+    }
+
+    public Optional<TypeOfFailure> getTypeOfFailureIfMatching(TypeOfFailure toMatch) {
+        return ofNullable(typeOfFailure == toMatch ? typeOfFailure : null);
     }
 
     public void setTypeOfFailure(TypeOfFailure typeOfFailure) {

@@ -1,5 +1,15 @@
 package com.hclc.kafkainspring.producer;
 
 public enum TypeOfFailure {
-    BEFORE_DB_COMMIT, AFTER_DB_COMMIT, NONE
+    AFTER_CONSUMED(1), BEFORE_DB_COMMIT(1), AFTER_DB_COMMIT(1), NONE(0);
+
+    private final int defaultFailuresCount;
+
+    TypeOfFailure(int defaultFailuresCount) {
+        this.defaultFailuresCount = defaultFailuresCount;
+    }
+
+    public int getDefaultFailuresCount() {
+        return defaultFailuresCount;
+    }
 }
