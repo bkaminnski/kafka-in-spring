@@ -23,6 +23,8 @@ import org.springframework.retry.support.RetryTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Boolean.FALSE;
+
 @Configuration
 @EnableKafka
 @ComponentScan("com.hclc.kafkainspring.failablemessages.consumed")
@@ -45,6 +47,7 @@ public class AssignedConsumerConfig {
 
     public Map<String, Object> consumerConfigs() {
         Map<String, Object> properties = new HashMap<>();
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, FALSE);
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
