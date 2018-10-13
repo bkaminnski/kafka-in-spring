@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.hclc.kafkainspring.failablemessages.consumed.MonotonicTimeProvider.monotonicNowInNano;
 import static com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure.AFTER_CONSUMED;
 
 @Component
@@ -22,9 +23,10 @@ public class SubscribedConsumer {
 
     @KafkaListener(topics = {"subscribedConsumerTopic"})
     public void consume(ConsumerRecord<String, String> record) {
+        long consumedAtMonotonicNano = monotonicNowInNano();
         try {
             FailableMessage failableMessage = new ObjectMapper().readValue(record.value(), FailableMessage.class);
-            eventPublisher.publishEvent(new ConsumedRecord<>(record, failableMessage));
+            eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage));
             failableMessage
                     .getTypeOfFailureIfMatching(AFTER_CONSUMED)
                     .ifPresent(TypeOfFailure::performFailureAction);

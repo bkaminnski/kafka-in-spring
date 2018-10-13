@@ -4,8 +4,17 @@ import com.hclc.kafkainspring.integrationtests.FailableMessage;
 
 public class ConsumedRecord {
 
+    private long consumedAtMonotonicNano;
     private ConsumerRecord consumerRecord;
     private FailableMessage failableMessage;
+
+    public long getConsumedAtMonotonicNano() {
+        return consumedAtMonotonicNano;
+    }
+
+    public void setConsumedAtMonotonicNano(long consumedAtMonotonicNano) {
+        this.consumedAtMonotonicNano = consumedAtMonotonicNano;
+    }
 
     public ConsumerRecord getConsumerRecord() {
         return consumerRecord;

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static com.hclc.kafkainspring.failablemessages.consumed.MonotonicTimeProvider.monotonicNowInNano;
 import static com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure.AFTER_CONSUMED;
 
 @Component
@@ -22,9 +23,10 @@ public class AssignedConsumer {
     private ApplicationEventPublisher eventPublisher;
 
     public void consume(ConsumerRecord<String, String> record) {
+        long consumedAtMonotonicNano = monotonicNowInNano();
         try {
             FailableMessage failableMessage = new ObjectMapper().readValue(record.value(), FailableMessage.class);
-            eventPublisher.publishEvent(new ConsumedRecord<>(record, failableMessage));
+            eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage));
             failableMessage
                     .getTypeOfFailureIfMatching(AFTER_CONSUMED)
                     .ifPresent(TypeOfFailure::performFailureAction);
@@ -34,9 +36,11 @@ public class AssignedConsumer {
     }
 
     public void handleError(Exception exception, ConsumerRecord<?, ?> consumerRecord, Consumer<?, ?> c) {
+        long errorHandledAtMonotonicNano = monotonicNowInNano();
+
         // TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
         // ConsumerAwareErrorHandler interface allows to manually adjust offset (below, restores the offset to replay failed message)
         // c.seek(topicPartition, consumerRecord.offset());
-        eventPublisher.publishEvent(new ErrorHandledRecord<>(consumerRecord, exception));
+        eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, consumerRecord, exception));
     }
 }
