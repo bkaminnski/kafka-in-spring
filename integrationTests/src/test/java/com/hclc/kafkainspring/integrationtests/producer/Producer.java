@@ -16,10 +16,11 @@ public class Producer {
         producerTarget = client.target(ENDPOINT);
     }
 
-    public ProducedRecord produce(String toTopic, TypeOfFailure typeOfFailure) {
+    public ProducedRecord produce(String toTopic, TypeOfFailure typeOfFailure, int failuresCount) {
         return producerTarget.path("/produce")
                 .queryParam("toTopic", toTopic)
                 .queryParam("typeOfFailure", typeOfFailure.toString())
+                .queryParam("failuresCount", failuresCount)
                 .request()
                 .get()
                 .readEntity(ProducedRecord.class);

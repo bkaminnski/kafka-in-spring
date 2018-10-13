@@ -1,5 +1,7 @@
 package com.hclc.kafkainspring.failablemessages.consumed;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+
 import static com.hclc.kafkainspring.failablemessages.consumed.FailureAction.DO_NOTHING;
 import static com.hclc.kafkainspring.failablemessages.consumed.FailureAction.THROW_EXCEPTION;
 
@@ -18,7 +20,7 @@ public enum TypeOfFailure {
         this.failureAction = failureAction;
     }
 
-    public void performFailureAction() {
-        failureAction.performFailureAction(this);
+    public void performFailureAction(ErrorsCountTracker errorsCountTracker, ConsumerRecord<?, ?> consumerRecord, int maxFailures) {
+        failureAction.performFailureAction(this, errorsCountTracker, consumerRecord, maxFailures);
     }
 }

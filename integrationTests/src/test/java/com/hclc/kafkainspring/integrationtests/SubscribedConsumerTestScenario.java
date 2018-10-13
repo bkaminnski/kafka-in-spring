@@ -1,8 +1,5 @@
 package com.hclc.kafkainspring.integrationtests;
 
-import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecord;
-import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecordResponse;
-import com.hclc.kafkainspring.integrationtests.consumers.ErrorHandledRecordResponse;
 import com.hclc.kafkainspring.integrationtests.consumers.SubscribedConsumer;
 import com.hclc.kafkainspring.integrationtests.producer.ProducedRecord;
 import com.hclc.kafkainspring.integrationtests.producer.Producer;
@@ -10,12 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.NONE;
-import static org.assertj.core.api.Assertions.assertThat;
 
-public class SubscribedConsumerTestScenario {
-
-    private Producer producer;
-    private SubscribedConsumer consumer;
+public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
 
     @BeforeEach
     void before() {
@@ -26,23 +19,10 @@ public class SubscribedConsumerTestScenario {
 
     @Test
     void producerProducesSubscribedConsumerConsumes() {
-        ProducedRecord produced = producer.produce("subscribedConsumerTopic", NONE);
+        ProducedRecord produced = producer.produce("subscribedConsumerTopic", NONE, 0);
 
         assertConsumedMatchesProduced(produced);
+        assertNoMoreConsumed();
         assertNoExceptionWasHandled();
-    }
-
-    private void assertConsumedMatchesProduced(ProducedRecord produced) {
-        ConsumedRecordResponse consumed = consumer.readConsumed();
-        assertThat(consumed.isOk()).isTrue();
-        ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
-        assertThat(consumedRecord.getFailableMessage()).isEqualTo(produced.getFailableMessage());
-        assertThat(consumedRecord.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
-                "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
-    }
-
-    private void assertNoExceptionWasHandled() {
-        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
-        assertThat(errorHandled.isTimedOut()).isTrue();
     }
 }

@@ -3,8 +3,8 @@ package com.hclc.kafkainspring.consumers.assign;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hclc.kafkainspring.failablemessages.consumed.ConsumedRecord;
 import com.hclc.kafkainspring.failablemessages.consumed.ErrorHandledRecord;
+import com.hclc.kafkainspring.failablemessages.consumed.ErrorsCountTracker;
 import com.hclc.kafkainspring.failablemessages.consumed.FailableMessage;
-import com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,9 @@ public class AssignedConsumer {
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
+    @Autowired
+    private ErrorsCountTracker errorsCountTracker;
+
     public void consume(ConsumerRecord<String, String> record) {
         long consumedAtMonotonicNano = monotonicNowInNano();
         try {
@@ -29,18 +32,19 @@ public class AssignedConsumer {
             eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage));
             failableMessage
                     .getTypeOfFailureIfMatching(AFTER_CONSUMED)
-                    .ifPresent(TypeOfFailure::performFailureAction);
+                    .ifPresent(f -> f.performFailureAction(errorsCountTracker, record, failableMessage.getFailuresCount()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void handleError(Exception exception, ConsumerRecord<?, ?> consumerRecord, Consumer<?, ?> c) {
+    public void handleError(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> c) {
         long errorHandledAtMonotonicNano = monotonicNowInNano();
+        errorsCountTracker.remove(record);
 
-        // TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+        // TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
         // ConsumerAwareErrorHandler interface allows to manually adjust offset (below, restores the offset to replay failed message)
-        // c.seek(topicPartition, consumerRecord.offset());
-        eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, consumerRecord, exception));
+        // c.seek(topicPartition, record.offset());
+        eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception));
     }
 }

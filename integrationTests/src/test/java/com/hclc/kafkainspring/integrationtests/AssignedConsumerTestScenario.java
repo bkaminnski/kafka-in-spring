@@ -10,10 +10,7 @@ import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.AFTER_CONSUM
 import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.NONE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AssignedConsumerTestScenario {
-
-    private Producer producer;
-    private Consumer consumer;
+public class AssignedConsumerTestScenario extends ConsumerTestScenario {
 
     @BeforeEach
     void before() {
@@ -24,38 +21,42 @@ public class AssignedConsumerTestScenario {
 
     @Test
     void producerProducesAssignedConsumerConsumes_noException() {
-        ProducedRecord produced = producer.produce("assignedConsumerTopic", NONE);
+        ProducedRecord produced = producer.produce("assignedConsumerTopic", NONE, 0);
 
         assertConsumedMatchesProduced(produced);
+        assertNoMoreConsumed();
         assertNoExceptionWasHandled();
     }
 
     @Test
-    void producerProducesAssignedConsumerConsumes_exceptionHandledByErroHandler() {
-        ProducedRecord produced = producer.produce("assignedConsumerTopic", AFTER_CONSUMED);
+    void producerProducesAssignedConsumerConsumes_failOnceNotReaching3TriesLimit_erroHandlerNotInvoked() {
+        ProducedRecord produced = producer.produce("assignedConsumerTopic", AFTER_CONSUMED, 1);
 
         assertConsumedMatchesProduced(produced);
-        assertExceptionWasHandled();
+        assertConsumedMatchesProduced(produced);
+        assertNoMoreConsumed();
+        assertNoExceptionWasHandled();
     }
 
-    private void assertConsumedMatchesProduced(ProducedRecord produced) {
-        ConsumedRecordResponse consumed = consumer.readConsumed();
-        assertThat(consumed.isOk()).isTrue();
-        ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
-        assertThat(consumedRecord.getFailableMessage()).isEqualTo(produced.getFailableMessage());
-        assertThat(consumedRecord.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
-                "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
+    @Test
+    void producerProducesAssignedConsumerConsumes_fail3TimesReaching3TriesLimit_exceptionHandledByErroHandler() {
+        ProducedRecord produced = producer.produce("assignedConsumerTopic", AFTER_CONSUMED, 3);
+
+        assertConsumedMatchesProduced(produced);
+        assertConsumedMatchesProduced(produced);
+        assertConsumedMatchesProduced(produced);
+        assertNoMoreConsumed();
+        assertExceptionWasHandled("Simulated failure AFTER_CONSUMED. Attempt 3/3.");
     }
 
-    private void assertNoExceptionWasHandled() {
-        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
-        assertThat(errorHandled.isTimedOut()).isTrue();
-    }
+    @Test
+    void producerProducesAssignedConsumerConsumes_fail4TimesExceeding3TriesLimit_exceptionHandledByErroHandler() {
+        ProducedRecord produced = producer.produce("assignedConsumerTopic", AFTER_CONSUMED, 4);
 
-    private void assertExceptionWasHandled() {
-        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
-        assertThat(errorHandled.isOk()).isTrue();
-        ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
-        assertThat(errorHandledRecord.getException().getMessage()).isEqualTo("Simulated failure AFTER_CONSUMED");
+        assertConsumedMatchesProduced(produced);
+        assertConsumedMatchesProduced(produced);
+        assertConsumedMatchesProduced(produced);
+        assertNoMoreConsumed();
+        assertExceptionWasHandled("Simulated failure AFTER_CONSUMED. Attempt 3/4.");
     }
 }
