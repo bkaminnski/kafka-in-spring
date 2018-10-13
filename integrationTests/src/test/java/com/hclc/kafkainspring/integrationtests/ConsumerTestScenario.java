@@ -34,6 +34,6 @@ abstract class ConsumerTestScenario {
         ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
         assertThat(errorHandled.isOk()).isTrue();
         ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
-        assertThat(errorHandledRecord.getException().getMessage()).isEqualTo(exceptionMessage);
+        assertThat(errorHandledRecord.getHandledException().getMessage()).contains(exceptionMessage);
     }
 }

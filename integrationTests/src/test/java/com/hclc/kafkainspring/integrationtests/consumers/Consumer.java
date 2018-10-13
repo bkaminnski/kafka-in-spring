@@ -18,12 +18,12 @@ public abstract class Consumer {
     }
 
     public ConsumedRecordResponse readConsumed() {
-        Response response = readWithTimeoutMillis(CONSUMED, 300);
+        Response response = readWithTimeoutMillis(CONSUMED, 1000);
         return new ConsumedRecordResponse(response.getStatus(), response.readEntity(ConsumptionState.class));
     }
 
     public ErrorHandledRecordResponse readErrorHandled() {
-        Response response = readWithTimeoutMillis(ERROR_HANDLED, 300);
+        Response response = readWithTimeoutMillis(ERROR_HANDLED, 1000);
         return new ErrorHandledRecordResponse(response.getStatus(), response.readEntity(ErrorHandlingState.class));
     }
 

@@ -4,7 +4,7 @@ public class ErrorHandledRecord {
 
     private long errorHandledAtMonotonicNano;
     private ConsumerRecord consumerRecord;
-    private Exception exception;
+    private HandledException handledException;
 
     public long getErrorHandledAtMonotonicNano() {
         return errorHandledAtMonotonicNano;
@@ -22,11 +22,11 @@ public class ErrorHandledRecord {
         this.consumerRecord = consumerRecord;
     }
 
-    public Exception getException() {
-        return exception;
+    public HandledException getHandledException() {
+        return handledException;
     }
 
-    public void setException(Exception exception) {
-        this.exception = exception;
+    public void setHandledException(HandledException handledException) {
+        this.handledException = handledException;
     }
 }

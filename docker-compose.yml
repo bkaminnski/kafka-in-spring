@@ -31,7 +31,7 @@ services:
     - KAFKA_PORT=9091
     - KAFKA_LISTENERS=PLAINTEXT://kafka1:9091
     # name:partitions:replicas:cleanup.policy
-    - KAFKA_CREATE_TOPICS=assignedConsumerTopic:1:1,subscribedConsumerTopic:1:1
+    - KAFKA_CREATE_TOPICS=assignedConsumerStatelessRetryTopic:1:1,assignedConsumerStatefulRetryTopic:1:1,subscribedConsumerTopic:1:1
     ports:
     - 9091:9091
     volumes:

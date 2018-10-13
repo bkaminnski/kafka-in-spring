@@ -8,12 +8,12 @@ public class ErrorHandledRecord<K, V> {
     private final long errorHandledAtMonotonicNano;
     @JsonSerialize(using = ConsumerRecordSerializer.class)
     private final ConsumerRecord<K, V> consumerRecord;
-    private final Exception exception;
+    private final HandledException handledException;
 
     public ErrorHandledRecord(long errorHandledAtMonotonicNano, ConsumerRecord<K, V> consumerRecord, Exception exception) {
         this.errorHandledAtMonotonicNano = errorHandledAtMonotonicNano;
         this.consumerRecord = consumerRecord;
-        this.exception = exception;
+        this.handledException = new HandledException(exception);
     }
 
     public long getErrorHandledAtMonotonicNano() {
@@ -24,7 +24,7 @@ public class ErrorHandledRecord<K, V> {
         return consumerRecord;
     }
 
-    public Exception getException() {
-        return exception;
+    public HandledException getHandledException() {
+        return handledException;
     }
 }

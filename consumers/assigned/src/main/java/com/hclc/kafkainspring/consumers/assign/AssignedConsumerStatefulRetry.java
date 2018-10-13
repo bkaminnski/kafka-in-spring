@@ -7,8 +7,10 @@ import com.hclc.kafkainspring.failablemessages.consumed.ErrorsCountTracker;
 import com.hclc.kafkainspring.failablemessages.consumed.FailableMessage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.retry.ExhaustedRetryException;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -17,7 +19,7 @@ import static com.hclc.kafkainspring.failablemessages.consumed.MonotonicTimeProv
 import static com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure.AFTER_CONSUMED;
 
 @Component
-public class AssignedConsumer {
+public class AssignedConsumerStatefulRetry {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -38,13 +40,15 @@ public class AssignedConsumer {
         }
     }
 
-    public void handleError(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> c) {
+    public void handleError(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer) {
         long errorHandledAtMonotonicNano = monotonicNowInNano();
-        errorsCountTracker.remove(record);
-
-        // TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-        // ConsumerAwareErrorHandler interface allows to manually adjust offset (below, restores the offset to replay failed message)
-        // c.seek(topicPartition, record.offset());
-        eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception));
+        if (exception instanceof ExhaustedRetryException) {
+            // retries are exhausted, so this time it is time to really handle the error
+            errorsCountTracker.remove(record);
+            eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception));
+        } else {
+            TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+            consumer.seek(topicPartition, record.offset());
+        }
     }
 }
