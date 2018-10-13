@@ -18,9 +18,10 @@ public class ConsumedEndpoint {
     private BlockingQueue<ConsumedRecord<?, ?>> consumedRecords = new LinkedBlockingQueue<>();
 
     @GetMapping
-    public ResponseEntity<ConsumedRecord<?, ?>> getConsumed(@RequestParam long timeoutMillis) throws InterruptedException {
+    public ResponseEntity<ConsumptionState> getConsumed(@RequestParam long timeoutMillis) throws InterruptedException {
         ConsumedRecord<?, ?> consumedRecord = consumedRecords.poll(timeoutMillis, MILLISECONDS);
-        return consumedRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(consumedRecord);
+        ConsumptionState consumptionState = new ConsumptionState(consumedRecords.size(), consumedRecord);
+        return consumedRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(consumptionState);
     }
 
     @EventListener

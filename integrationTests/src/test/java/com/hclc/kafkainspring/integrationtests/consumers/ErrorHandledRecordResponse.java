@@ -1,15 +1,15 @@
 package com.hclc.kafkainspring.integrationtests.consumers;
 
-public class ErrorHandledRecordResponse  extends Response {
+public class ErrorHandledRecordResponse extends Response {
 
-    private final ErrorHandledRecord errorHandledRecord;
+    private final ErrorHandlingState errorHandlingState;
 
-    public ErrorHandledRecordResponse(int statusCode, ErrorHandledRecord errorHandledRecord) {
+    public ErrorHandledRecordResponse(int statusCode, ErrorHandlingState errorHandlingState) {
         super(statusCode);
-        this.errorHandledRecord = errorHandledRecord;
+        this.errorHandlingState = errorHandlingState;
     }
 
-    public ErrorHandledRecord getErrorHandledRecord() {
-        return errorHandledRecord;
+    public ErrorHandlingState getErrorHandlingState() {
+        return errorHandlingState;
     }
 }

@@ -2,15 +2,14 @@ package com.hclc.kafkainspring.integrationtests.consumers;
 
 public class ConsumedRecordResponse extends Response {
 
-    private final ConsumedRecord consumedRecord;
+    private final ConsumptionState consumptionState;
 
-    public ConsumedRecordResponse(int statusCode, ConsumedRecord consumedRecord) {
+    public ConsumedRecordResponse(int statusCode, ConsumptionState consumptionState) {
         super(statusCode);
-        this.consumedRecord = consumedRecord;
+        this.consumptionState = consumptionState;
     }
 
-    public ConsumedRecord getConsumedRecord() {
-        return consumedRecord;
+    public ConsumptionState getConsumptionState() {
+        return consumptionState;
     }
-
 }

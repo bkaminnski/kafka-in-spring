@@ -18,9 +18,10 @@ public class ErrorHandledEndpoint {
     private BlockingQueue<ErrorHandledRecord<?, ?>> errorHandledRecords = new LinkedBlockingQueue<>();
 
     @GetMapping("/errorHandled")
-    public ResponseEntity<ErrorHandledRecord<?, ?>> getErrorHandled(@RequestParam long timeoutMillis) throws InterruptedException {
+    public ResponseEntity<ErrorHandlingState> getErrorHandled(@RequestParam long timeoutMillis) throws InterruptedException {
         ErrorHandledRecord<?, ?> errorHandledRecord = errorHandledRecords.poll(timeoutMillis, MILLISECONDS);
-        return errorHandledRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(errorHandledRecord);
+        ErrorHandlingState errorHandlingState = new ErrorHandlingState(errorHandledRecords.size(), errorHandledRecord);
+        return errorHandledRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(errorHandlingState);
     }
 
     @EventListener

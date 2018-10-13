@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ConsumerAwareErrorHandler;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.listener.config.ContainerProperties;
@@ -34,7 +35,7 @@ public class AssignedConsumerConfig {
         ConsumerFactory<String, String> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerConfigs());
         TopicPartitionInitialOffset topicPartitionInitialOffset = new TopicPartitionInitialOffset("assignedConsumerTopic", 0);
         ContainerProperties containerProperties = new ContainerProperties(topicPartitionInitialOffset);
-        containerProperties.setErrorHandler(assignedConsumer::handleError);
+        containerProperties.setErrorHandler((ConsumerAwareErrorHandler) assignedConsumer::handleError);
         containerProperties.setMessageListener((MessageListener<String, String>) consumerRecord -> assignedConsumer.consume(consumerRecord));
         return new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
     }

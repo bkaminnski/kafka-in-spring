@@ -5,6 +5,7 @@ import com.hclc.kafkainspring.failablemessages.consumed.ConsumedRecord;
 import com.hclc.kafkainspring.failablemessages.consumed.ErrorHandledRecord;
 import com.hclc.kafkainspring.failablemessages.consumed.FailableMessage;
 import com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,7 +33,10 @@ public class AssignedConsumer {
         }
     }
 
-    public void handleError(Exception exception, ConsumerRecord<?, ?> consumerRecord) {
+    public void handleError(Exception exception, ConsumerRecord<?, ?> consumerRecord, Consumer<?, ?> c) {
+        // TopicPartition topicPartition = new TopicPartition(consumerRecord.topic(), consumerRecord.partition());
+        // ConsumerAwareErrorHandler interface allows to manually adjust offset (below, restores the offset to replay failed message)
+        // c.seek(topicPartition, consumerRecord.offset());
         eventPublisher.publishEvent(new ErrorHandledRecord<>(consumerRecord, exception));
     }
 }

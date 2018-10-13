@@ -1,9 +1,6 @@
 package com.hclc.kafkainspring.integrationtests;
 
-import com.hclc.kafkainspring.integrationtests.consumers.AssignedConsumer;
-import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecordResponse;
-import com.hclc.kafkainspring.integrationtests.consumers.Consumer;
-import com.hclc.kafkainspring.integrationtests.consumers.ErrorHandledRecordResponse;
+import com.hclc.kafkainspring.integrationtests.consumers.*;
 import com.hclc.kafkainspring.integrationtests.producer.ProducedRecord;
 import com.hclc.kafkainspring.integrationtests.producer.Producer;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,8 +41,9 @@ public class AssignedConsumerTestScenario {
     private void assertConsumedMatchesProduced(ProducedRecord produced) {
         ConsumedRecordResponse consumed = consumer.readConsumed();
         assertThat(consumed.isOk()).isTrue();
-        assertThat(consumed.getConsumedRecord().getFailableMessage()).isEqualTo(produced.getFailableMessage());
-        assertThat(consumed.getConsumedRecord().getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
+        ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
+        assertThat(consumedRecord.getFailableMessage()).isEqualTo(produced.getFailableMessage());
+        assertThat(consumedRecord.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
                 "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
     }
 
@@ -57,7 +55,7 @@ public class AssignedConsumerTestScenario {
     private void assertExceptionWasHandled() {
         ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled();
         assertThat(errorHandled.isOk()).isTrue();
-        assertThat(errorHandled.getErrorHandledRecord().getException().getMessage()).isEqualTo("Simulated failure AFTER_CONSUMED");
+        ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
+        assertThat(errorHandledRecord.getException().getMessage()).isEqualTo("Simulated failure AFTER_CONSUMED");
     }
-
 }

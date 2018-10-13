@@ -1,5 +1,6 @@
 package com.hclc.kafkainspring.integrationtests;
 
+import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecord;
 import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecordResponse;
 import com.hclc.kafkainspring.integrationtests.consumers.ErrorHandledRecordResponse;
 import com.hclc.kafkainspring.integrationtests.consumers.SubscribedConsumer;
@@ -34,8 +35,9 @@ public class SubscribedConsumerTestScenario {
     private void assertConsumedMatchesProduced(ProducedRecord produced) {
         ConsumedRecordResponse consumed = consumer.readConsumed();
         assertThat(consumed.isOk()).isTrue();
-        assertThat(consumed.getConsumedRecord().getFailableMessage()).isEqualTo(produced.getFailableMessage());
-        assertThat(consumed.getConsumedRecord().getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
+        ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
+        assertThat(consumedRecord.getFailableMessage()).isEqualTo(produced.getFailableMessage());
+        assertThat(consumedRecord.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
                 "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
     }
 
