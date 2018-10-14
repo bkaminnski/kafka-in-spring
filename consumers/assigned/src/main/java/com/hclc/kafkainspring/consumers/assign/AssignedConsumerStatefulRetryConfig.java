@@ -47,6 +47,7 @@ public class AssignedConsumerStatefulRetryConfig {
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        properties.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 300);
         return properties;
     }
 

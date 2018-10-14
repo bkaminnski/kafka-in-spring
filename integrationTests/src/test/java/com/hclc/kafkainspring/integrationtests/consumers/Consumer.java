@@ -17,17 +17,17 @@ public abstract class Consumer {
         assignedConsumerTarget = client.target(endpoint);
     }
 
-    public ConsumedRecordResponse readConsumed() {
-        Response response = readWithTimeoutMillis(CONSUMED, 1000);
+    public ConsumedRecordResponse readConsumed(long additionalIntervalMillisForPolling) {
+        Response response = readWithTimeoutMillis(CONSUMED, 300 + additionalIntervalMillisForPolling);
         return new ConsumedRecordResponse(response.getStatus(), response.readEntity(ConsumptionState.class));
     }
 
-    public ErrorHandledRecordResponse readErrorHandled() {
-        Response response = readWithTimeoutMillis(ERROR_HANDLED, 1000);
+    public ErrorHandledRecordResponse readErrorHandled(long additionalIntervalMillisForPolling) {
+        Response response = readWithTimeoutMillis(ERROR_HANDLED, 300 + additionalIntervalMillisForPolling);
         return new ErrorHandledRecordResponse(response.getStatus(), response.readEntity(ErrorHandlingState.class));
     }
 
-    private Response readWithTimeoutMillis(String endpoint, int timeoutMillis) {
+    private Response readWithTimeoutMillis(String endpoint, long timeoutMillis) {
         return assignedConsumerTarget.path(endpoint)
                 .queryParam("timeoutMillis", timeoutMillis)
                 .request()
