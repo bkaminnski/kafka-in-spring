@@ -28,5 +28,10 @@
             <artifactId>consumed</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.hclc.kafkainspring</groupId>
+            <artifactId>kafkalisteners</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

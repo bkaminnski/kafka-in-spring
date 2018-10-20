@@ -4,11 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.hclc.kafkainspring</groupId>
-    <artifactId>failablemessages</artifactId>
+    <artifactId>kafkalisteners</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
-    <name>Kafka in Spring Failable Messages</name>
+    <name>Kafka Listeners Management</name>
+    <description>Listing, pausing, resuming, etc.</description>
 
     <parent>
         <groupId>com.hclc</groupId>
@@ -16,8 +17,4 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../</relativePath>
     </parent>
-
-    <modules>
-        <module>consumed</module>
-    </modules>
 </project>

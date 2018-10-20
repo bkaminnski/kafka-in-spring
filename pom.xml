@@ -19,6 +19,7 @@
     </parent>
 
     <modules>
+        <module>kafkaListeners</module>
         <module>failableMessages</module>
         <module>consumers</module>
         <module>producer</module>

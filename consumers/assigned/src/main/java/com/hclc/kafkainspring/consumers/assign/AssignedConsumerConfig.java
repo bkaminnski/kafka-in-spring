@@ -6,7 +6,10 @@ import org.springframework.kafka.annotation.EnableKafka;
 
 @Configuration
 @EnableKafka
-@ComponentScan("com.hclc.kafkainspring.failablemessages.consumed")
+@ComponentScan({
+        "com.hclc.kafkainspring.failablemessages.consumed",
+        "com.hclc.kafkainspring.kafkalisteners"
+})
 public class AssignedConsumerConfig {
 
 }

@@ -20,7 +20,7 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
     }
 
     @Test
-    void producerProducesSubscribedConsumerConsumes() {
+    void succeedOnFirstAttempt_errorHandlerNotInvoked() {
         ProducedRecord produced = producer.produce("subscribedConsumerTopic", NONE, 0);
 
         assertConsumedMatchesProduced(produced, new ArrayList<>(), 0);
