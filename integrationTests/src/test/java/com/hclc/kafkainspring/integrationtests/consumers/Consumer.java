@@ -10,17 +10,19 @@ import javax.ws.rs.core.Response;
 import static java.lang.String.format;
 import static javax.ws.rs.client.Entity.json;
 import static org.glassfish.grizzly.http.util.HttpStatus.GATEWAY_TIMEOUT_504;
+import static org.glassfish.grizzly.http.util.HttpStatus.OK_200;
 
 public abstract class Consumer {
     private static final String CONSUMED = "/consumed";
     private static final String ERROR_HANDLED = "/errorHandled";
+    private static final String LOGGED = "/logged";
     private static final String KAFKA_LISTENER = "/kafkaListeners/%s";
     private static final String KAFKA_LISTENER_TRANSITIONS = KAFKA_LISTENER + "/transitions";
-    private WebTarget assignedConsumerTarget;
+    private WebTarget consumerTarget;
 
     Consumer(String endpoint) {
         Client client = ClientBuilder.newClient();
-        assignedConsumerTarget = client.target(endpoint);
+        consumerTarget = client.target(endpoint);
     }
 
     public ConsumedRecordResponse readConsumed(long additionalIntervalMillisForPolling) {
@@ -34,7 +36,7 @@ public abstract class Consumer {
     }
 
     private Response readWithTimeoutMillis(String endpoint, long timeoutMillis) {
-        return assignedConsumerTarget.path(endpoint)
+        return consumerTarget.path(endpoint)
                 .queryParam("timeoutMillis", timeoutMillis)
                 .request()
                 .get();
@@ -43,6 +45,7 @@ public abstract class Consumer {
     public void drain() {
         drainConsumed();
         drainErrorHandled();
+        drainLogged();
     }
 
     private void drainConsumed() {
@@ -55,11 +58,16 @@ public abstract class Consumer {
         }
     }
 
+    private void drainLogged() {
+        while (readWithTimeoutMillis(LOGGED, 0).getStatus() != GATEWAY_TIMEOUT_504.getStatusCode()) {
+        }
+    }
+
     public int resumeConsumptionOn(String listenerContainer) {
         JsonObject transitionRequest = Json.createObjectBuilder()
                 .add("nextState", "RUNNING")
                 .build();
-        return assignedConsumerTarget.path(format(KAFKA_LISTENER_TRANSITIONS, listenerContainer))
+        return consumerTarget.path(format(KAFKA_LISTENER_TRANSITIONS, listenerContainer))
                 .request()
                 .post(json(transitionRequest))
                 .getStatus();
@@ -69,13 +77,31 @@ public abstract class Consumer {
         boolean containerIsPaused = true;
         for (int i = 0; containerIsPaused && i < 10; i++) {
             wait100millis();
-            containerIsPaused = assignedConsumerTarget.path(format(KAFKA_LISTENER, listenerContainer))
+            containerIsPaused = consumerTarget.path(format(KAFKA_LISTENER, listenerContainer))
                     .request()
                     .get()
                     .readEntity(JsonObject.class)
                     .getBoolean("containerPaused");
         }
         return !containerIsPaused;
+    }
+
+    public boolean waitUntilLogged(String message, int consumerIndex) {
+        boolean conditionsAreMet = false;
+        for (int i = 0; !conditionsAreMet && i < 100; i++) {
+            wait100millis();
+            Response response = consumerTarget.path(LOGGED)
+                    .queryParam("timeoutMillis", 100)
+                    .request()
+                    .get();
+            if (response.getStatus() == OK_200.getStatusCode()) {
+                LoggedRecord loggedRecord = response
+                        .readEntity(LoggingState.class)
+                        .getHeadOfQueue();
+                conditionsAreMet = loggedRecord.isForConsumerIndex(consumerIndex) && message.equals(loggedRecord.getMessage());
+            }
+        }
+        return conditionsAreMet;
     }
 
     private void wait100millis() {

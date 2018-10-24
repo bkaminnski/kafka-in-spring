@@ -5,6 +5,7 @@ public class ErrorHandledRecord {
     private long errorHandledAtMonotonicNano;
     private ConsumerRecord consumerRecord;
     private HandledException handledException;
+    private ContainerThreadName containerThreadName;
 
     public long getErrorHandledAtMonotonicNano() {
         return errorHandledAtMonotonicNano;
@@ -28,5 +29,13 @@ public class ErrorHandledRecord {
 
     public void setHandledException(HandledException handledException) {
         this.handledException = handledException;
+    }
+
+    public void setContainerThreadName(String containerThreadName) {
+        this.containerThreadName = new ContainerThreadName(containerThreadName);
+    }
+
+    public boolean isForConsumerIndex(int consumerIndex) {
+        return containerThreadName.isForConsumerIndex(consumerIndex);
     }
 }

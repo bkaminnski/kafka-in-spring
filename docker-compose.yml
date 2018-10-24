@@ -15,9 +15,9 @@ services:
     - ZOO_SERVERS=server.1=zookeeper1:2888:3888
     ports:
     - 2181:2181
-    volumes:
-    - /mnt/sda1/kafkainspring/zookeeper1/data:/data
-    - /mnt/sda1/kafkainspring/zookeeper1/datalog:/datalog
+    # volumes:
+    # - /mnt/sda1/kafkainspring/zookeeper1/data:/data
+    # - /mnt/sda1/kafkainspring/zookeeper1/datalog:/datalog
     networks:
     - kafkainspring_network
 
@@ -31,11 +31,11 @@ services:
     - KAFKA_PORT=9091
     - KAFKA_LISTENERS=PLAINTEXT://kafka1:9091
     # name:partitions:replicas:cleanup.policy
-    - KAFKA_CREATE_TOPICS=assignedConsumerStatelessRetryTopic:1:1,assignedConsumerStatefulRetryTopic:1:1,assignedConsumerStatefulRetryPauseOnErrorTopic:1:1,subscribedConsumerTopic:1:1
+    - KAFKA_CREATE_TOPICS=assignedConsumerStatelessRetryTopic:1:1,assignedConsumerStatefulRetryTopic:1:1,assignedConsumerStatefulRetryPauseOnErrorTopic:1:1,subscribedConsumerSimpleTopic:1:1,subscribedConsumerRebalancedTopic:2:1
     ports:
     - 9091:9091
-    volumes:
-    - /mnt/sda1/kafkainspring/kafka1/data:/data
+    # volumes:
+    # - /mnt/sda1/kafkainspring/kafka1/data:/data
     networks:
     - kafkainspring_network
     depends_on:

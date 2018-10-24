@@ -17,10 +17,15 @@ public class Producer {
     }
 
     public ProducedRecord produce(String toTopic, TypeOfFailure typeOfFailure, int failuresCount) {
+        return produce(toTopic, typeOfFailure, failuresCount, null);
+    }
+
+    public ProducedRecord produce(String toTopic, TypeOfFailure typeOfFailure, int failuresCount, Integer partition) {
         return producerTarget.path("/produce")
                 .queryParam("toTopic", toTopic)
                 .queryParam("typeOfFailure", typeOfFailure.toString())
                 .queryParam("failuresCount", failuresCount)
+                .queryParam("partition", partition)
                 .request()
                 .get()
                 .readEntity(ProducedRecord.class);

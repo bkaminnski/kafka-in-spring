@@ -1,10 +1,10 @@
 package com.hclc.kafkainspring.consumers.assign;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hclc.kafkainspring.failablemessages.consumed.ConsumedRecord;
-import com.hclc.kafkainspring.failablemessages.consumed.ErrorHandledRecord;
-import com.hclc.kafkainspring.failablemessages.consumed.ErrorsCountTracker;
-import com.hclc.kafkainspring.failablemessages.consumed.FailableMessage;
+import com.hclc.kafkainspring.monitoring.consumed.ConsumedRecord;
+import com.hclc.kafkainspring.monitoring.errorhandled.ErrorHandledRecord;
+import com.hclc.kafkainspring.monitoring.errorhandled.ErrorsCountTracker;
+import com.hclc.kafkainspring.monitoring.failablemessages.FailableMessage;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.TopicPartition;
@@ -16,8 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-import static com.hclc.kafkainspring.failablemessages.consumed.MonotonicTimeProvider.monotonicNowInNano;
-import static com.hclc.kafkainspring.failablemessages.consumed.TypeOfFailure.AFTER_CONSUMED;
+import static com.hclc.kafkainspring.monitoring.MonotonicTimeProvider.monotonicNowInNano;
+import static com.hclc.kafkainspring.monitoring.failablemessages.TypeOfFailure.EXCEPTION_AFTER_CONSUMED;
+import static java.lang.Thread.currentThread;
 
 @Component
 public class AssignedConsumerStatefulRetryPauseOnError {
@@ -34,9 +35,9 @@ public class AssignedConsumerStatefulRetryPauseOnError {
         long consumedAtMonotonicNano = monotonicNowInNano();
         try {
             FailableMessage failableMessage = new ObjectMapper().readValue(record.value(), FailableMessage.class);
-            eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage));
+            eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage, currentThread().getName()));
             failableMessage
-                    .getTypeOfFailureIfMatching(AFTER_CONSUMED)
+                    .getTypeOfFailureIfMatching(EXCEPTION_AFTER_CONSUMED)
                     .ifPresent(f -> f.performFailureAction(errorsCountTracker, record, failableMessage.getFailuresCount()));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -52,7 +53,7 @@ public class AssignedConsumerStatefulRetryPauseOnError {
         if (exception instanceof ExhaustedRetryException) {
             // retries are exhausted, so this time it is time to really handle the error
             errorsCountTracker.remove(record);
-            eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception));
+            eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception, currentThread().getName()));
             listenerContainer.pause();
         } else {
             consumer.seek(topicPartition, record.offset());

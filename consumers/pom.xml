@@ -24,8 +24,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.hclc.kafkainspring.failablemessages</groupId>
-            <artifactId>consumed</artifactId>
+            <groupId>com.hclc.kafkainspring</groupId>
+            <artifactId>monitoring</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

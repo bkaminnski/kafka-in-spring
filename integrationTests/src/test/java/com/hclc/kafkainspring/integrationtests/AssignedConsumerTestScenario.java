@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.AFTER_CONSUMED;
+import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.EXCEPTION_AFTER_CONSUMED;
 import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.NONE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.glassfish.grizzly.http.util.HttpStatus.OK_200;
@@ -45,7 +45,7 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
             "assignedConsumerStatefulRetryTopic, 300"
     })
     void failOnceNotReaching3TriesLimit_errorHandlerNotInvoked(String topic, long additionalIntervalMillisForPolling) {
-        ProducedRecord produced = producer.produce(topic, AFTER_CONSUMED, 1);
+        ProducedRecord produced = producer.produce(topic, EXCEPTION_AFTER_CONSUMED, 1);
 
         List<Long> consumedAtMonotonicNano = new ArrayList<>();
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
@@ -61,14 +61,14 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
             "assignedConsumerStatefulRetryTopic, 300"
     })
     void fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling) {
-        ProducedRecord produced = producer.produce(topic, AFTER_CONSUMED, 3);
+        ProducedRecord produced = producer.produce(topic, EXCEPTION_AFTER_CONSUMED, 3);
 
         List<Long> consumedAtMonotonicNano = new ArrayList<>();
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertExceptionWasHandled("Simulated failure AFTER_CONSUMED. Attempt 3/3.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
+        assertExceptionWasHandled("Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/3.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertElapsedTimeBetweenHandlingRecords(consumedAtMonotonicNano, additionalIntervalMillisForPolling, 100, 200, 0);
     }
 
@@ -78,14 +78,14 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
             "assignedConsumerStatefulRetryTopic, 300"
     })
     void fail4TimesExceeding3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling) {
-        ProducedRecord produced = producer.produce(topic, AFTER_CONSUMED, 4);
+        ProducedRecord produced = producer.produce(topic, EXCEPTION_AFTER_CONSUMED, 4);
 
         List<Long> consumedAtMonotonicNano = new ArrayList<>();
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertExceptionWasHandled("Simulated failure AFTER_CONSUMED. Attempt 3/4.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
+        assertExceptionWasHandled("Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/4.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertElapsedTimeBetweenHandlingRecords(consumedAtMonotonicNano, additionalIntervalMillisForPolling, 100, 200, 0);
     }
 

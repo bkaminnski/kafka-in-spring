@@ -1,16 +1,13 @@
-package com.hclc.kafkainspring.consumers.assign;
+package com.hclc.kafkainspring.consumers.subscribed;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hclc.kafkainspring.monitoring.consumed.ConsumedRecord;
-import com.hclc.kafkainspring.monitoring.errorhandled.ErrorHandledRecord;
 import com.hclc.kafkainspring.monitoring.errorhandled.ErrorsCountTracker;
 import com.hclc.kafkainspring.monitoring.failablemessages.FailableMessage;
-import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.retry.ExhaustedRetryException;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -20,7 +17,7 @@ import static com.hclc.kafkainspring.monitoring.failablemessages.TypeOfFailure.E
 import static java.lang.Thread.currentThread;
 
 @Component
-public class AssignedConsumerStatefulRetry {
+public class SubscribedConsumerSimple {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
@@ -28,6 +25,10 @@ public class AssignedConsumerStatefulRetry {
     @Autowired
     private ErrorsCountTracker errorsCountTracker;
 
+    /**
+     * Uses default container factory named "kafkaListenerContainerFactory"
+     */
+    @KafkaListener(topics = {"subscribedConsumerSimpleTopic"})
     public void consume(ConsumerRecord<String, String> record) {
         long consumedAtMonotonicNano = monotonicNowInNano();
         try {
@@ -38,18 +39,6 @@ public class AssignedConsumerStatefulRetry {
                     .ifPresent(f -> f.performFailureAction(errorsCountTracker, record, failableMessage.getFailuresCount()));
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    public void handleError(Exception exception, ConsumerRecord<?, ?> record, Consumer<?, ?> consumer) {
-        long errorHandledAtMonotonicNano = monotonicNowInNano();
-        if (exception instanceof ExhaustedRetryException) {
-            // retries are exhausted, so this time it is time to really handle the error
-            errorsCountTracker.remove(record);
-            eventPublisher.publishEvent(new ErrorHandledRecord<>(errorHandledAtMonotonicNano, record, exception, currentThread().getName()));
-        } else {
-            TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-            consumer.seek(topicPartition, record.offset());
         }
     }
 }

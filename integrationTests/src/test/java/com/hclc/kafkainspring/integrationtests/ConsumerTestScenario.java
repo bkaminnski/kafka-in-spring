@@ -16,7 +16,7 @@ abstract class ConsumerTestScenario {
     Producer producer;
     Consumer consumer;
 
-    void assertConsumedMatchesProduced(ProducedRecord produced, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
+    ConsumedRecordResponse assertConsumedMatchesProduced(ProducedRecord produced, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
         ConsumedRecordResponse consumed = consumer.readConsumed(additionalIntervalMillisForPolling);
         assertThat(consumed.isOk()).isTrue();
         ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
@@ -25,6 +25,8 @@ abstract class ConsumerTestScenario {
                 "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
 
         consumedAtMonotonicNano.add(consumedRecord.getConsumedAtMonotonicNano());
+
+        return consumed;
     }
 
     void assertNoExceptionWasHandled() {
@@ -35,6 +37,15 @@ abstract class ConsumerTestScenario {
     void assertNoMoreConsumed() {
         ConsumedRecordResponse consumed = consumer.readConsumed(0);
         assertThat(consumed.isTimedOut()).isTrue();
+    }
+
+    ErrorHandledRecordResponse assertExceptionWasHandled(String name, String message) {
+        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled(0);
+        assertThat(errorHandled.isOk()).isTrue();
+        ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
+        assertThat(errorHandledRecord.getHandledException().getName()).contains(name);
+        assertThat(errorHandledRecord.getHandledException().getMessage()).contains(message);
+        return errorHandled;
     }
 
     void assertExceptionWasHandled(String exceptionMessage, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
@@ -53,5 +64,13 @@ abstract class ConsumerTestScenario {
             long maxExpectedElapsedTimeMillis = minExpectedElapsedTimeMillis + MAX_ACCEPTABLE_OVERHEAD_MILLIS;
             assertThat(actualElapsedTimeMillis).isBetween(minExpectedElapsedTimeMillis, maxExpectedElapsedTimeMillis);
         }
+    }
+
+    void assertConsumedByConsumerWithIndex(ConsumedRecordResponse consumedRecordResponse, int consumerIndex) {
+        assertThat(consumedRecordResponse.getConsumptionState().getHeadOfQueue().isForConsumerIndex(consumerIndex)).isTrue();
+    }
+
+    void assertHandledByConsumerWithIndex(ErrorHandledRecordResponse errorHandledRecordResponse, int consumerIndex) {
+        assertThat(errorHandledRecordResponse.getErrorHandlingState().getHeadOfQueue().isForConsumerIndex(consumerIndex)).isTrue();
     }
 }

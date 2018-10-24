@@ -7,6 +7,7 @@ public class ConsumedRecord {
     private long consumedAtMonotonicNano;
     private ConsumerRecord consumerRecord;
     private FailableMessage failableMessage;
+    private ContainerThreadName containerThreadName;
 
     public long getConsumedAtMonotonicNano() {
         return consumedAtMonotonicNano;
@@ -30,5 +31,13 @@ public class ConsumedRecord {
 
     public void setFailableMessage(FailableMessage failableMessage) {
         this.failableMessage = failableMessage;
+    }
+
+    public void setContainerThreadName(String containerThreadName) {
+        this.containerThreadName = new ContainerThreadName(containerThreadName);
+    }
+
+    public boolean isForConsumerIndex(int consumerIndex) {
+        return containerThreadName.isForConsumerIndex(consumerIndex);
     }
 }
