@@ -8,8 +8,6 @@ import com.hclc.kafkainspring.integrationtests.producer.Producer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
 import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.NONE;
 import static com.hclc.kafkainspring.integrationtests.TypeOfFailure.PROCESSING_TIME_EXCEEDING_SESSION_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +28,7 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
     void succeedOnFirstAttempt_errorHandlerNotInvoked() {
         ProducedRecord produced = producer.produce("subscribedConsumerSimpleTopic", NONE, 0);
 
-        assertConsumedMatchesProduced(produced, new ArrayList<>(), 0);
+        assertConsumedMatchesProduced(produced);
         assertNoMoreConsumed();
         assertNoExceptionWasHandled();
     }
@@ -56,7 +54,7 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
     }
 
     private void assertConsumedByConsumer(ProducedRecord produced, int consumerIndex, long additionalWaitingTime) {
-        ConsumedRecordResponse consumed = assertConsumedMatchesProduced(produced, new ArrayList<>(), additionalWaitingTime);
+        ConsumedRecordResponse consumed = assertConsumedMatchesProduced(produced, additionalWaitingTime);
         assertConsumedByConsumerWithIndex(consumed, consumerIndex);
     }
 

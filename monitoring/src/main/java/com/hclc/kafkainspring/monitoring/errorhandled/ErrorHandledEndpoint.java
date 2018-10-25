@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -22,6 +24,11 @@ public class ErrorHandledEndpoint {
         ErrorHandledRecord<?, ?> errorHandledRecord = errorHandledRecords.poll(timeoutMillis, MILLISECONDS);
         ErrorHandlingState errorHandlingState = new ErrorHandlingState(errorHandledRecords.size(), errorHandledRecord);
         return errorHandledRecord == null ? ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).build() : ResponseEntity.ok(errorHandlingState);
+    }
+
+    @GetMapping("/errorHandled/preview")
+    public ResponseEntity<List<ErrorHandledRecord<?, ?>>> preview() throws InterruptedException {
+        return ResponseEntity.ok(new ArrayList<>(errorHandledRecords));
     }
 
     @EventListener

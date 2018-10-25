@@ -34,7 +34,7 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
     void succeedOnFirstAttempt_errorHandlerNotInvoked(String topic, long additionalIntervalMillisForPolling) {
         ProducedRecord produced = producer.produce(topic, NONE, 0);
 
-        assertConsumedMatchesProduced(produced, new ArrayList<>(), additionalIntervalMillisForPolling);
+        assertConsumedMatchesProduced(produced, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
         assertNoExceptionWasHandled();
     }
@@ -130,6 +130,6 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
     }
 
     private void eventuallyConsumeProducedRecordAfterConsumptionIsResumed(ProducedRecord produced, long additionalIntervalMillisForPolling) {
-        assertConsumedMatchesProduced(produced, new ArrayList<>(), additionalIntervalMillisForPolling);
+        assertConsumedMatchesProduced(produced, additionalIntervalMillisForPolling);
     }
 }

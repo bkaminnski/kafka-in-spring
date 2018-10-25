@@ -7,6 +7,7 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,8 +18,8 @@ import static java.util.stream.Collectors.toMap;
 @RestController
 public class KafkaListenersEndpoint {
 
-    @Autowired
-    private List<KafkaMessageListenerContainer<?, ?>> listenerContainers;
+    @Autowired(required = false)
+    private List<KafkaMessageListenerContainer<?, ?>> listenerContainers = new ArrayList<>();
     private Map<String, KafkaMessageListenerContainer<?, ?>> listenerContainersByName;
 
     @PostConstruct

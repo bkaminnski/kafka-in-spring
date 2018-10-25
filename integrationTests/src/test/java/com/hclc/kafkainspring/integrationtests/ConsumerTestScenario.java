@@ -4,6 +4,7 @@ import com.hclc.kafkainspring.integrationtests.consumers.*;
 import com.hclc.kafkainspring.integrationtests.producer.ProducedRecord;
 import com.hclc.kafkainspring.integrationtests.producer.Producer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,6 +17,14 @@ abstract class ConsumerTestScenario {
     Producer producer;
     Consumer consumer;
 
+    ConsumedRecordResponse assertConsumedMatchesProduced(ProducedRecord produced) {
+        return assertConsumedMatchesProduced(produced, new ArrayList<>(), 0);
+    }
+
+    ConsumedRecordResponse assertConsumedMatchesProduced(ProducedRecord produced, long additionalIntervalMillisForPolling) {
+        return assertConsumedMatchesProduced(produced, new ArrayList<>(), additionalIntervalMillisForPolling);
+    }
+
     ConsumedRecordResponse assertConsumedMatchesProduced(ProducedRecord produced, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
         ConsumedRecordResponse consumed = consumer.readConsumed(additionalIntervalMillisForPolling);
         assertThat(consumed.isOk()).isTrue();
@@ -25,6 +34,18 @@ abstract class ConsumerTestScenario {
                 "offset", "partition", "serializedKeySize", "serializedValueSize", "timestamp", "topic");
 
         consumedAtMonotonicNano.add(consumedRecord.getConsumedAtMonotonicNano());
+
+        return consumed;
+    }
+
+    ConsumedRecordResponse assertForwarded(ProducedRecord produced, String toTopic) {
+        ConsumedRecordResponse consumed = consumer.readConsumed(0);
+        assertThat(consumed.isOk()).isTrue();
+        ConsumedRecord consumedRecord = consumed.getConsumptionState().getHeadOfQueue();
+        assertThat(consumedRecord.getFailableMessage()).isEqualTo(produced.getFailableMessage());
+        assertThat(consumedRecord.getConsumerRecord()).isEqualToComparingOnlyGivenFields(produced.getSendResult().getRecordMetadata(),
+                "partition", "serializedKeySize", "serializedValueSize");
+        assertThat(consumedRecord.getConsumerRecord().getTopic()).isEqualTo(toTopic);
 
         return consumed;
     }
