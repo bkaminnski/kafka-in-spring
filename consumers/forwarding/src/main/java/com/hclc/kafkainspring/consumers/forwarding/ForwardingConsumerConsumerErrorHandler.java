@@ -1,4 +1,4 @@
-package com.hclc.kafkainspring.consumers.subscribed;
+package com.hclc.kafkainspring.consumers.forwarding;
 
 import com.hclc.kafkainspring.monitoring.errorhandled.ErrorHandledRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,7 +11,7 @@ import static com.hclc.kafkainspring.monitoring.MonotonicTimeProvider.monotonicN
 import static java.lang.Thread.currentThread;
 
 @Component
-public class SubscribedConsumerRebalancedErrorHandler implements ErrorHandler {
+public class ForwardingConsumerConsumerErrorHandler implements ErrorHandler {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;

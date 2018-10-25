@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class ConsumerTestScenario {
 
-    private static final long MAX_ACCEPTABLE_OVERHEAD_MILLIS = 75;
+    private static final long MAX_ACCEPTABLE_OVERHEAD_MILLIS = 125;
     private static final long NANO_TO_MILLIS = 1000 * 1000;
 
     Producer producer;
@@ -50,7 +50,7 @@ abstract class ConsumerTestScenario {
         return consumed;
     }
 
-    void assertNoExceptionWasHandled() {
+    void assertNoMoreExceptionsHandled() {
         ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled(0);
         assertThat(errorHandled.isTimedOut()).isTrue();
     }
@@ -60,22 +60,25 @@ abstract class ConsumerTestScenario {
         assertThat(consumed.isTimedOut()).isTrue();
     }
 
-    ErrorHandledRecordResponse assertExceptionWasHandled(String name, String message) {
-        ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled(0);
-        assertThat(errorHandled.isOk()).isTrue();
-        ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
-        assertThat(errorHandledRecord.getHandledException().getName()).contains(name);
-        assertThat(errorHandledRecord.getHandledException().getMessage()).contains(message);
-        return errorHandled;
+    ErrorHandledRecord assertExceptionWasHandledByConsumer(String exceptionName, String exceptionMessage, int consumerIndex) {
+        ErrorHandledRecord errorHandledRecord = assertExceptionWasHandled(exceptionName, exceptionMessage, new ArrayList<>(), 0);
+        assertThat(errorHandledRecord.isForConsumerIndex(consumerIndex)).isTrue();
+        return errorHandledRecord;
     }
 
-    void assertExceptionWasHandled(String exceptionMessage, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
+    ErrorHandledRecord assertExceptionWasHandled(String exceptionName, String exceptionMessage) {
+        return assertExceptionWasHandled(exceptionName, exceptionMessage, new ArrayList<>(), 0);
+    }
+
+    ErrorHandledRecord assertExceptionWasHandled(String exceptionName, String exceptionMessage, List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling) {
         ErrorHandledRecordResponse errorHandled = consumer.readErrorHandled(additionalIntervalMillisForPolling);
         assertThat(errorHandled.isOk()).isTrue();
         ErrorHandledRecord errorHandledRecord = errorHandled.getErrorHandlingState().getHeadOfQueue();
+        assertThat(errorHandledRecord.getHandledException().getName()).isEqualTo(exceptionName);
         assertThat(errorHandledRecord.getHandledException().getMessage()).contains(exceptionMessage);
 
         consumedAtMonotonicNano.add(errorHandledRecord.getErrorHandledAtMonotonicNano());
+        return errorHandledRecord;
     }
 
     void assertElapsedTimeBetweenHandlingRecords(List<Long> consumedAtMonotonicNano, long additionalIntervalMillisForPolling, long... expectedElapsedTimeMillis) {
@@ -89,9 +92,5 @@ abstract class ConsumerTestScenario {
 
     void assertConsumedByConsumerWithIndex(ConsumedRecordResponse consumedRecordResponse, int consumerIndex) {
         assertThat(consumedRecordResponse.getConsumptionState().getHeadOfQueue().isForConsumerIndex(consumerIndex)).isTrue();
-    }
-
-    void assertHandledByConsumerWithIndex(ErrorHandledRecordResponse errorHandledRecordResponse, int consumerIndex) {
-        assertThat(errorHandledRecordResponse.getErrorHandlingState().getHeadOfQueue().isForConsumerIndex(consumerIndex)).isTrue();
     }
 }

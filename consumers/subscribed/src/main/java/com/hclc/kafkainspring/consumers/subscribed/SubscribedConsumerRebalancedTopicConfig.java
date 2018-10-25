@@ -43,11 +43,11 @@ public class SubscribedConsumerRebalancedTopicConfig {
         return factory;
     }
 
-    public ConsumerFactory<String, String> consumerFactory() {
+    private ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
-    public Map<String, Object> consumerConfigs() {
+    private Map<String, Object> consumerConfigs() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, FALSE);
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);

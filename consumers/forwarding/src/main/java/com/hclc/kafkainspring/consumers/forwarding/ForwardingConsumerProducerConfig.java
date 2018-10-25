@@ -2,6 +2,7 @@ package com.hclc.kafkainspring.consumers.forwarding;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,9 @@ public class ForwardingConsumerProducerConfig {
     @Value("${kafka.client-id}")
     private String clientId;
 
+    @Autowired
+    private ForwardingConsumerProducerListener producerListener;
+
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         DefaultKafkaProducerFactory<String, String> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(producerConfigs());
@@ -35,7 +39,7 @@ public class ForwardingConsumerProducerConfig {
         return new KafkaTransactionManager<>(producerFactory);
     }
 
-    public Map<String, Object> producerConfigs() {
+    private Map<String, Object> producerConfigs() {
         Map<String, Object> properties = new HashMap<>();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -49,6 +53,8 @@ public class ForwardingConsumerProducerConfig {
 
     @Bean
     public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
-        return new KafkaTemplate<String, String>(producerFactory);
+        KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+        kafkaTemplate.setProducerListener(producerListener);
+        return kafkaTemplate;
     }
 }

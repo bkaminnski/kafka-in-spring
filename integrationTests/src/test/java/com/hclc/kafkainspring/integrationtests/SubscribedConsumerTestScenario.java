@@ -1,7 +1,6 @@
 package com.hclc.kafkainspring.integrationtests;
 
 import com.hclc.kafkainspring.integrationtests.consumers.ConsumedRecordResponse;
-import com.hclc.kafkainspring.integrationtests.consumers.ErrorHandledRecordResponse;
 import com.hclc.kafkainspring.integrationtests.consumers.SubscribedConsumer;
 import com.hclc.kafkainspring.integrationtests.producer.ProducedRecord;
 import com.hclc.kafkainspring.integrationtests.producer.Producer;
@@ -30,7 +29,7 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
 
         assertConsumedMatchesProduced(produced);
         assertNoMoreConsumed();
-        assertNoExceptionWasHandled();
+        assertNoMoreExceptionsHandled();
     }
 
     @Test
@@ -42,7 +41,7 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
         assertConsumedByConsumer1(producedToPartition1, 0);
 
         assertNoMoreConsumed();
-        assertNoExceptionWasHandled();
+        assertNoMoreExceptionsHandled();
     }
 
     private void assertConsumedByConsumer0(ProducedRecord producedRecord, long additionalWaitingTime) {
@@ -72,12 +71,15 @@ public class SubscribedConsumerTestScenario extends ConsumerTestScenario {
         // Eventually, when real reason is gone, that forgotten message might have actually executed some code leaving unwanted
         // side effects.
         assertConsumedByConsumer0(producedWithLongProcessingTimeToPartition0, LONG_PROCESSING_WAITING_TIME_MILLIS);
-        ErrorHandledRecordResponse errorHandled = assertExceptionWasHandled("org.apache.kafka.clients.consumer.CommitFailedException", "Commit cannot be completed since the group has already rebalanced and assigned the partitions to another member.");
-        assertHandledByConsumerWithIndex(errorHandled, 0);
+        assertExceptionWasHandledByConsumer0("org.apache.kafka.clients.consumer.CommitFailedException", "Commit cannot be completed since the group has already rebalanced and assigned the partitions to another member.");
 
         // Wait until Kafka is back to original partitions assignment,
         // so that this test leaves Kafka in the same state as it was before starting the test.
         waitUntilKafkaStateIsBackToOriginalPartitionsAssignment();
+    }
+
+    private void assertExceptionWasHandledByConsumer0(String exceptionName, String exceptionMessage) {
+        assertExceptionWasHandledByConsumer(exceptionName, exceptionMessage, 0);
     }
 
     private void waitUntilKafkaStateIsBackToOriginalPartitionsAssignment() {

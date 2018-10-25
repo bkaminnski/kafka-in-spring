@@ -36,7 +36,7 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
 
         assertConsumedMatchesProduced(produced, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertNoExceptionWasHandled();
+        assertNoMoreExceptionsHandled();
     }
 
     @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}")
@@ -51,16 +51,16 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertNoExceptionWasHandled();
+        assertNoMoreExceptionsHandled();
         assertElapsedTimeBetweenHandlingRecords(consumedAtMonotonicNano, additionalIntervalMillisForPolling, 100);
     }
 
-    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}")
+    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}, exceptionName={2}")
     @CsvSource({
-            "assignedConsumerStatelessRetryTopic, 0",
-            "assignedConsumerStatefulRetryTopic, 300"
+            "assignedConsumerStatelessRetryTopic, 0, java.lang.RuntimeException",
+            "assignedConsumerStatefulRetryTopic, 300, org.springframework.retry.ExhaustedRetryException"
     })
-    void fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling) {
+    void fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling, String exceptionName) {
         ProducedRecord produced = producer.produce(topic, EXCEPTION_AFTER_CONSUMED, 3);
 
         List<Long> consumedAtMonotonicNano = new ArrayList<>();
@@ -68,16 +68,16 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertExceptionWasHandled("Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/3.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
+        assertExceptionWasHandled(exceptionName, "Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/3.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertElapsedTimeBetweenHandlingRecords(consumedAtMonotonicNano, additionalIntervalMillisForPolling, 100, 200, 0);
     }
 
-    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}")
+    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}, exceptionName={2}")
     @CsvSource({
-            "assignedConsumerStatelessRetryTopic, 0",
-            "assignedConsumerStatefulRetryTopic, 300"
+            "assignedConsumerStatelessRetryTopic, 0, java.lang.RuntimeException",
+            "assignedConsumerStatefulRetryTopic, 300, org.springframework.retry.ExhaustedRetryException"
     })
-    void fail4TimesExceeding3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling) {
+    void fail4TimesExceeding3TriesLimit_exceptionHandledByErrorHandler(String topic, long additionalIntervalMillisForPolling, String exceptionName) {
         ProducedRecord produced = producer.produce(topic, EXCEPTION_AFTER_CONSUMED, 4);
 
         List<Long> consumedAtMonotonicNano = new ArrayList<>();
@@ -85,17 +85,17 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertConsumedMatchesProduced(produced, consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertNoMoreConsumed();
-        assertExceptionWasHandled("Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/4.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
+        assertExceptionWasHandled(exceptionName, "Simulated failure EXCEPTION_AFTER_CONSUMED. Attempt 3/4.", consumedAtMonotonicNano, additionalIntervalMillisForPolling);
         assertElapsedTimeBetweenHandlingRecords(consumedAtMonotonicNano, additionalIntervalMillisForPolling, 100, 200, 0);
     }
 
-    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}")
+    @ParameterizedTest(name = "{index} => topic=''{0}'', additionalIntervalMillisForPolling={1}, exceptionName={2}")
     @CsvSource({
-            "assignedConsumerStatelessRetryTopic, 0",
-            "assignedConsumerStatefulRetryTopic, 300"
+            "assignedConsumerStatelessRetryTopic, 0, java.lang.RuntimeException",
+            "assignedConsumerStatefulRetryTopic, 300, org.springframework.retry.ExhaustedRetryException"
     })
-    void continueConsumptionAfterHandlingFailure(String topic, long additionalIntervalMillisForPolling) {
-        fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(topic, additionalIntervalMillisForPolling);
+    void continueConsumptionAfterHandlingFailure(String topic, long additionalIntervalMillisForPolling, String exceptionName) {
+        fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(topic, additionalIntervalMillisForPolling, exceptionName);
         succeedOnFirstAttempt_errorHandlerNotInvoked(topic, additionalIntervalMillisForPolling);
     }
 
@@ -108,7 +108,7 @@ public class AssignedConsumerTestScenario extends ConsumerTestScenario {
         String listenerContainer = "assignedConsumerStatefulRetryPauseOnErrorListenerContainer";
         long additionalIntervalMillisForPolling = 300;
 
-        fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(topic, additionalIntervalMillisForPolling);
+        fail3TimesReaching3TriesLimit_exceptionHandledByErrorHandler(topic, additionalIntervalMillisForPolling, "org.springframework.retry.ExhaustedRetryException");
         ProducedRecord producedRecord = doNotConsumeProducedRecordAfterConsumptionIsPaused(topic, additionalIntervalMillisForPolling);
         resumeConsumption(listenerContainer);
         eventuallyConsumeProducedRecordAfterConsumptionIsResumed(producedRecord, additionalIntervalMillisForPolling);
