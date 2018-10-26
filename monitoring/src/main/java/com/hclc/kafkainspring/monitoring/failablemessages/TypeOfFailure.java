@@ -9,8 +9,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 public enum TypeOfFailure {
     EXCEPTION_AFTER_CONSUMED(FailureAction.THROW_EXCEPTION),
     EXCEPTION_AFTER_FORWARDED(FailureAction.THROW_EXCEPTION),
-    EXCEPTION_BEFORE_DB_COMMIT(FailureAction.THROW_EXCEPTION),
-    EXCEPTION_AFTER_DB_COMMIT(FailureAction.THROW_EXCEPTION),
     PROCESSING_TIME_EXCEEDING_SESSION_TIMEOUT(FailureAction.SIMULATE_LONG_PROCESSING_TIME),
     NONE(FailureAction.DO_NOTHING);
 

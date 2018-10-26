@@ -21,6 +21,7 @@
         <module>assigned</module>
         <module>subscribed</module>
         <module>forwarding</module>
+        <module>forwardingWithDb</module>
     </modules>
 
     <dependencies>

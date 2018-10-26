@@ -18,7 +18,7 @@ public abstract class Consumer {
     private static final String LOGGED = "/logged";
     private static final String KAFKA_LISTENER = "/kafkaListeners/%s";
     private static final String KAFKA_LISTENER_TRANSITIONS = KAFKA_LISTENER + "/transitions";
-    private WebTarget consumerTarget;
+    WebTarget consumerTarget;
 
     Consumer(String endpoint) {
         Client client = ClientBuilder.newClient();
