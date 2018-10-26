@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static com.hclc.kafkainspring.monitoring.MonotonicTimeProvider.monotonicNowInNano;
+import static com.hclc.kafkainspring.monitoring.failablemessages.TypeOfFailure.EXCEPTION_AFTER_FORWARDED;
 import static java.lang.Thread.currentThread;
 
 @Component
@@ -46,6 +47,9 @@ public class ForwardingWithDbConsumerFirstLine {
             eventPublisher.publishEvent(new ConsumedRecord<>(consumedAtMonotonicNano, record, failableMessage, currentThread().getName()));
             messageRepository.save(new Message(failableMessage.toString()));
             template.send("forwardingWithDbConsumerSecondLineTopic", failableMessage.getUniqueId(), record.value());
+            failableMessage
+                    .getTypeOfFailureIfMatching(EXCEPTION_AFTER_FORWARDED)
+                    .ifPresent(f -> f.performFailureAction(errorsCountTracker, record, failableMessage.getFailuresCount()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,6 +1,8 @@
 package com.hclc.kafkainspring.integrationtests.consumers;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 public class ForwardingWithDbConsumer extends Consumer {
 
@@ -28,6 +30,13 @@ public class ForwardingWithDbConsumer extends Consumer {
         return consumerTarget.path(LAST_MESSAGE)
                 .request()
                 .get()
+                .readEntity(Message.class);
+    }
+
+    public Message generateReferenceMessage() {
+        return consumerTarget.path(MESSAGES)
+                .request()
+                .post(Entity.json(new Message("Reference message " + UUID.randomUUID().toString())))
                 .readEntity(Message.class);
     }
 }
