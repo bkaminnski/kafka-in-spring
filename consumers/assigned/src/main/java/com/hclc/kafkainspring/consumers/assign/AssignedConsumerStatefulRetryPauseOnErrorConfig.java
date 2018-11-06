@@ -50,6 +50,8 @@ public class AssignedConsumerStatefulRetryPauseOnErrorConfig {
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 300);
+        // if producer is transactional, make sure to read only committed messages
+        properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return properties;
     }
 

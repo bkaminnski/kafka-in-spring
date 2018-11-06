@@ -66,6 +66,8 @@ public class ForwardingConsumerConsumerConfig {
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        // if producer is transactional, make sure to read only committed messages
+        properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return properties;
     }
 }

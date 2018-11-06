@@ -29,8 +29,8 @@ public class ForwardingConsumerProducerConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         DefaultKafkaProducerFactory<String, String> kafkaProducerFactory = new DefaultKafkaProducerFactory<>(producerConfigs());
-        // required for the producer to be transactional
-        kafkaProducerFactory.setTransactionIdPrefix("prosumerTX");
+        // required for the producer to be transactional; underneath configures "transactional.id" producer configuration property
+        kafkaProducerFactory.setTransactionIdPrefix("forwardingTX");
         return kafkaProducerFactory;
     }
 
@@ -44,10 +44,13 @@ public class ForwardingConsumerProducerConfig {
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        properties.put(ProducerConfig.ACKS_CONFIG, "all");
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, clientId);
         // highest guarantee of ordering; anything > 1 risks reordering in case of failed delivery
         properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, 1);
+        // wait for all replicas to acknowledge the message
+        properties.put(ProducerConfig.ACKS_CONFIG, "all");
+        // avoid duplicates
+        properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         return properties;
     }
 

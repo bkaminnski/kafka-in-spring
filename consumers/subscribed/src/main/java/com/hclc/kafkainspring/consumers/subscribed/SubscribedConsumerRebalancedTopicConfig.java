@@ -54,6 +54,8 @@ public class SubscribedConsumerRebalancedTopicConfig {
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        // if producer is transactional, make sure to read only committed messages
+        properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         properties.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 500);
         // From Kafka doc: "the value must be in the allowable range as configured in the broker configuration by group.min.session.timeout.ms and group.max.session.timeout.ms"
         properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 6000);

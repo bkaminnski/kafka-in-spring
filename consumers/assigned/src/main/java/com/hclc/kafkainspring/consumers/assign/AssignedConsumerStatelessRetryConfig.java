@@ -47,6 +47,8 @@ public class AssignedConsumerStatelessRetryConfig {
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        // if producer is transactional, make sure to read only committed messages
+        properties.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
         return properties;
     }
 
